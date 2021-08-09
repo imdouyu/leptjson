@@ -119,8 +119,8 @@ static int lept_parse_number(lept_context *c, lept_value *v) {
       ;
   }
   errno = 0;
-  v->n = strtod(c->json, NULL);
-  if (errno == ERANGE && (v->n == HUGE_VAL || v->n == -HUGE_VAL))
+  v->u.n = strtod(c->json, NULL);
+  if (errno == ERANGE && (v->u.n == HUGE_VAL || v->u.n == -HUGE_VAL))
     return LEPT_PARSE_NUMBER_TOO_BIG;
   c->json = end;
   v->type = LEPT_NUMBER;
@@ -166,5 +166,5 @@ lept_type lept_get_type(const lept_value *v) {
 
 double lept_get_number(const lept_value *v) {
   assert(v != NULL && v->type == LEPT_NUMBER);
-  return v->n;
+  return v->u.n;
 }

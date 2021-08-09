@@ -1,6 +1,8 @@
 #ifndef LEPTJSON_H__
 #define LEPTJSON_H__
 
+#include <stddef.h> /* size_t */
+
 typedef enum {
   LEPT_NULL,
   LEPT_FALSE,
@@ -12,7 +14,13 @@ typedef enum {
 } lept_type;
 
 typedef struct {
-  double n;
+  union {
+    struct {
+      char *s; /*string*/
+      size_t len;
+    } s;
+    double n; /*number*/
+  } u;
   lept_type type;
 } lept_value;
 
