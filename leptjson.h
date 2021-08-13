@@ -16,7 +16,7 @@ typedef enum {
 typedef struct {
   union {
     struct {
-      char *s; /*string*/
+      char* s; /*string*/
       size_t len;
     } s;
     double n; /*number*/
@@ -32,8 +32,8 @@ enum {
   LEPT_PARSE_NUMBER_TOO_BIG
 };
 
-int lept_parse(lept_value *v, const char *json);
-lept_type lept_get_type(const lept_value *v);
-double lept_get_number(const lept_value *v);
+int lept_parse(lept_value* v, const char* json);
+lept_type lept_get_type(const lept_value* v);
+double lept_get_number(const lept_value* v);
 
 #endif /* LEPTJSON_H__ */

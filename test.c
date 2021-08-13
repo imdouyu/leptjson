@@ -79,18 +79,18 @@ static void test_parse_number() {
   TEST_NUMBER(0.0, "1e-10000"); /* must underflow */
 
   TEST_NUMBER(1.0000000000000002,
-              "1.0000000000000002"); /* the smallest number > 1 */
+    "1.0000000000000002"); /* the smallest number > 1 */
   TEST_NUMBER(4.9406564584124654e-324,
-              "4.9406564584124654e-324"); /* minimum denormal */
+    "4.9406564584124654e-324"); /* minimum denormal */
   TEST_NUMBER(-4.9406564584124654e-324, "-4.9406564584124654e-324");
   TEST_NUMBER(2.2250738585072009e-308,
-              "2.2250738585072009e-308"); /* Max subnormal double */
+    "2.2250738585072009e-308"); /* Max subnormal double */
   TEST_NUMBER(-2.2250738585072009e-308, "-2.2250738585072009e-308");
   TEST_NUMBER(2.2250738585072014e-308,
-              "2.2250738585072014e-308"); /* Min normal positive double */
+    "2.2250738585072014e-308"); /* Min normal positive double */
   TEST_NUMBER(-2.2250738585072014e-308, "-2.2250738585072014e-308");
   TEST_NUMBER(1.7976931348623157e+308,
-              "1.7976931348623157e+308"); /* Max double */
+    "1.7976931348623157e+308"); /* Max double */
   TEST_NUMBER(-1.7976931348623157e+308, "-1.7976931348623157e+308");
 }
 
@@ -131,7 +131,7 @@ static void test_parse_invalid_value() {
   TEST_ERROR(LEPT_PARSE_INVALID_VALUE, "+0");
   TEST_ERROR(LEPT_PARSE_INVALID_VALUE, "+1");
   TEST_ERROR(LEPT_PARSE_INVALID_VALUE,
-             ".123"); /* at least one digit before '.' */
+    ".123"); /* at least one digit before '.' */
   TEST_ERROR(LEPT_PARSE_INVALID_VALUE, "1."); /* at least one digit after '.' */
   TEST_ERROR(LEPT_PARSE_INVALID_VALUE, "INF");
   TEST_ERROR(LEPT_PARSE_INVALID_VALUE, "inf");
@@ -173,6 +173,6 @@ static void test_parse() {
 int main() {
   test_parse();
   printf("%d/%d (%3.2f%%) passed\n", test_pass, test_count,
-         test_pass * 100.0 / test_count);
+    test_pass * 100.0 / test_count);
   return main_ret;
 }

@@ -13,11 +13,11 @@
 #define ISDIGIT1TO9(ch) ((ch) >= '1' && (ch) <= '9')
 
 typedef struct {
-  const char *json;
+  const char* json;
 } lept_context;
 
-static void lept_parse_whitespace(lept_context *c) {
-  const char *p = c->json;
+static void lept_parse_whitespace(lept_context* c) {
+  const char* p = c->json;
   while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')
     p++;
   c->json = p;
@@ -63,7 +63,7 @@ static void lept_parse_whitespace(lept_context *c) {
 //   return LEPT_PARSE_OK;
 // }
 
-static int lept_parse_literal(lept_context *c, lept_value *v) {
+static int lept_parse_literal(lept_context* c, lept_value* v) {
   switch (*c->json) {
   case 'n':
     if (c->json[1] != 'u' || c->json[2] != 'l' || c->json[3] != 'l')
@@ -79,7 +79,7 @@ static int lept_parse_literal(lept_context *c, lept_value *v) {
     return LEPT_PARSE_OK;
   case 'f':
     if (c->json[1] != 'a' || c->json[2] != 'l' || c->json[3] != 's' ||
-        c->json[4] != 'e')
+      c->json[4] != 'e')
       return LEPT_PARSE_INVALID_VALUE;
     c->json += 5;
     v->type = LEPT_FALSE;
@@ -89,8 +89,8 @@ static int lept_parse_literal(lept_context *c, lept_value *v) {
   }
 }
 
-static int lept_parse_number(lept_context *c, lept_value *v) {
-  const char *end = c->json;
+static int lept_parse_number(lept_context* c, lept_value* v) {
+  const char* end = c->json;
   // while(c->json)
   if (*end == '-')
     end++;
@@ -127,7 +127,7 @@ static int lept_parse_number(lept_context *c, lept_value *v) {
   return LEPT_PARSE_OK;
 }
 
-static int lept_parse_value(lept_context *c, lept_value *v) {
+static int lept_parse_value(lept_context* c, lept_value* v) {
   switch (*c->json) {
   case 'n':
     return lept_parse_literal(c, v);
@@ -142,7 +142,7 @@ static int lept_parse_value(lept_context *c, lept_value *v) {
   }
 }
 
-int lept_parse(lept_value *v, const char *json) {
+int lept_parse(lept_value* v, const char* json) {
   lept_context c;
   int ret;
   assert(v != NULL);
@@ -159,12 +159,12 @@ int lept_parse(lept_value *v, const char *json) {
   return ret;
 }
 
-lept_type lept_get_type(const lept_value *v) {
+lept_type lept_get_type(const lept_value* v) {
   assert(v != NULL);
   return v->type;
 }
 
-double lept_get_number(const lept_value *v) {
+double lept_get_number(const lept_value* v) {
   assert(v != NULL && v->type == LEPT_NUMBER);
   return v->u.n;
 }
