@@ -128,6 +128,7 @@ static void test_access_boolean() {
   lept_value v;
   lept_init(&v);
   lept_set_string(&v, "leptjson", 8);
+  lept_free(&v);
   lept_set_boolean(&v, LEPT_TRUE);
   EXPECT_EQ_INT(LEPT_TRUE, lept_get_boolean(&v));
   lept_set_boolean(&v, LEPT_FALSE);
@@ -139,6 +140,7 @@ static void test_access_number() {
   lept_value v;
   lept_init(&v);
   lept_set_string(&v, "leptjson", 8);
+  lept_free(&v);
   lept_set_number(&v, 20210816.0);
   EXPECT_EQ_DOUBLE(20210816.0, lept_get_number(&v));
   lept_set_number(&v, 2021.0816);
