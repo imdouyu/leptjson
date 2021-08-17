@@ -50,46 +50,6 @@ static void lept_parse_whitespace(lept_context* c) {
   c->json = p;
 }
 
-// static int lept_parse_null(lept_context *c, lept_value *v) {
-//   EXPECT(c, 'n');
-//   if (c->json[0] != 'u' || c->json[1] != 'l' || c->json[2] != 'l') {
-//     return LEPT_PARSE_INVALID_VALUE;
-//   }
-//   c->json += 3;
-//   //   lept_parse_whitespace(c);
-//   //   if (*c->json)
-//   //     return LEPT_PARSE_ROOT_NOT_SINGULAR;
-//   v->type = LEPT_NULL;
-//   return LEPT_PARSE_OK;
-// }
-
-// static int lept_parse_true(lept_context *c, lept_value *v) {
-//   EXPECT(c, 't');
-//   if (c->json[0] != 'r' || c->json[1] != 'u' || c->json[2] != 'e') {
-//     return LEPT_PARSE_INVALID_VALUE;
-//   }
-//   c->json += 3;
-//   //   lept_parse_whitespace(c);
-//   //   if (*c->json)
-//   //     return LEPT_PARSE_ROOT_NOT_SINGULAR;
-//   v->type = LEPT_TRUE;
-//   return LEPT_PARSE_OK;
-// }
-
-// static int lept_parse_false(lept_context *c, lept_value *v) {
-//   EXPECT(c, 'f');
-//   if (c->json[0] != 'a' || c->json[1] != 'l' || c->json[2] != 's' ||
-//       c->json[3] != 'e') {
-//     return LEPT_PARSE_INVALID_VALUE;
-//   }
-//   c->json += 4;
-//   //   lept_parse_whitespace(c);
-//   //   if (*c->json)
-//   //     return LEPT_PARSE_ROOT_NOT_SINGULAR;
-//   v->type = LEPT_FALSE;
-//   return LEPT_PARSE_OK;
-// }
-
 static int lept_parse_literal(lept_context* c, lept_value* v) {
   switch (*c->json) {
   case 'n':
@@ -155,7 +115,6 @@ static int lept_parse_number(lept_context* c, lept_value* v) {
 
 static int lept_parse_string(lept_context* c, lept_value* v) {
   size_t head = c->top, len;
-  // assert()
   EXPECT(c, '\"');
   const char* p;
   p = c->json;
@@ -229,7 +188,6 @@ int lept_parse(lept_value* v, const char* json) {
   c.stack = NULL;
   c.size = 0;
   c.top = 0;
-  // v->type = LEPT_NULL;
   lept_init(v);
   lept_parse_whitespace(&c);
   if ((ret = lept_parse_value(&c, v)) == LEPT_PARSE_OK) {

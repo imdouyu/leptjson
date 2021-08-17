@@ -167,27 +167,11 @@ static void test_access_string() {
   } while (0)
 
 static void test_parse_expect_value() {
-  // lept_value v;
-  // v.type = LEPT_FALSE;
-  // EXPECT_EQ_INT(LEPT_PARSE_EXPECT_VALUE, lept_parse(&v, ""));
-  // EXPECT_EQ_INT(LEPT_NULL, lept_get_type(&v));
-
-  // v.type = LEPT_FALSE;
-  // EXPECT_EQ_INT(LEPT_PARSE_EXPECT_VALUE, lept_parse(&v, " "));
-  // EXPECT_EQ_INT(LEPT_NULL, lept_get_type(&v));
   TEST_ERROR(LEPT_PARSE_EXPECT_VALUE, "");
   TEST_ERROR(LEPT_PARSE_EXPECT_VALUE, " ");
 }
 
 static void test_parse_invalid_value() {
-  // lept_value v;
-  // v.type = LEPT_FALSE;
-  // EXPECT_EQ_INT(LEPT_PARSE_INVALID_VALUE, lept_parse(&v, "nul"));
-  // EXPECT_EQ_INT(LEPT_NULL, lept_get_type(&v));
-
-  // v.type = LEPT_FALSE;
-  // EXPECT_EQ_INT(LEPT_PARSE_INVALID_VALUE, lept_parse(&v, "?"));
-  // EXPECT_EQ_INT(LEPT_NULL, lept_get_type(&v));
   TEST_ERROR(LEPT_PARSE_INVALID_VALUE, "nul");
   TEST_ERROR(LEPT_PARSE_INVALID_VALUE, "?");
 
