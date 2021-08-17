@@ -45,7 +45,7 @@ void lept_free(lept_value* v);
 #define lept_set_null(v) lept_free(v)
 
 int lept_get_boolean(const lept_value* v);
-void lept_set_boolean(lept_value* v, int b);
+void lept_set_boolean(lept_value* v, lept_type b);
 
 double lept_get_number(const lept_value* v);
 void lept_set_number(lept_value* v, double n);

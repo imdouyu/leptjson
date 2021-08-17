@@ -219,7 +219,7 @@ int lept_get_boolean(const lept_value* v) {
   return v->type;
 }
 
-void lept_set_boolean(lept_value* v, int b) {
+void lept_set_boolean(lept_value* v, lept_type b) {
   assert(v != NULL);
   v->type = b;
 }
