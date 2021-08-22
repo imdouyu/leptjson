@@ -313,7 +313,7 @@ void lept_free(lept_value* v) {
     break;
   case LEPT_ARRAY:
     for (size_t i = 0; i < v->u.a.size; i++)
-      lept_free(&v->u.a.e[0]);
+      lept_free(&v->u.a.e[i]);
     free(v->u.a.e);
     break;
   default:
