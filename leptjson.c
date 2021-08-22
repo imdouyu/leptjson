@@ -306,8 +306,19 @@ int lept_parse(lept_value* v, const char* json) {
 
 void lept_free(lept_value* v) {
   assert(v != NULL);
-  if (v->type == LEPT_STRING)
+  switch (v->type)
+  {
+  case LEPT_STRING:
     free(v->u.s.s);
+    break;
+  case LEPT_ARRAY:
+    for (size_t i = 0; i < v->u.a.size; i++)
+      lept_free(&v->u.a.e[0]);
+    free(v->u.a.e);
+    break;
+  default:
+    break;
+  }
   v->type = LEPT_NULL;
 }
 
