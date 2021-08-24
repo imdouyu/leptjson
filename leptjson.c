@@ -298,6 +298,7 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
     v->u.o.m = NULL;
     return LEPT_PARSE_OK;
   }
+  m.k = NULL;
   while (1) {
     lept_init(&m.v);
     size_t len = 0;
@@ -319,12 +320,14 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
       lept_parse_whitespace(c);
     }
     else {
-      free(m.k);
+      // free(m.k);
       ret = LEPT_PARSE_MISS_COLON;
       break;
     }
-    if ((ret = lept_parse_value(c, &m.v)) != LEPT_PARSE_OK)
+    if ((ret = lept_parse_value(c, &m.v)) != LEPT_PARSE_OK) {
+      // free(m.k);
       break;
+    }
     memcpy(lept_context_push(c, sizeof(lept_member)), &m, sizeof(lept_member));
     size++;
     m.k = NULL;
@@ -347,6 +350,7 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
       break;
     }
   }
+  free(m.k);
   //free objects in stack
   for (size_t i = 0; i < size; i++) {
     lept_member* member = lept_context_pop(c, sizeof(lept_member));
@@ -479,4 +483,20 @@ lept_value* lept_get_array_element(const lept_value* v, size_t index) {
   assert(v != NULL && v->type == LEPT_ARRAY);
   assert(index < v->u.a.size);
   return &v->u.a.e[index];
+}
+
+size_t lept_get_object_size(const lept_value* v) {
+  return v->u.o.size;
+}
+
+const char* lept_get_object_key(const lept_value* v, size_t index) {
+  return v->u.o.m[index].k;
+}
+
+size_t lept_get_object_key_length(const lept_value* v, size_t index) {
+  return v->u.o.m[index].klen;
+}
+
+lept_value* lept_get_object_value(const lept_value* v, size_t index) {
+  return &v->u.o.m[index].v;
 }
