@@ -285,6 +285,77 @@ static int lept_parse_array(lept_context* c, lept_value* v) {
   return ret;
 }
 
+static int lept_parse_object(lept_context* c, lept_value* v) {
+  size_t size = 0;
+  lept_member m;
+  int ret;
+  EXPECT(c, '{');
+  lept_parse_whitespace(c);
+  if (*c->json == '}') {
+    c->json++;
+    v->type = LEPT_OBJECT;
+    v->u.o.size = 0;
+    v->u.o.m = NULL;
+    return LEPT_PARSE_OK;
+  }
+  while (1) {
+    lept_init(&m.v);
+    size_t len = 0;
+    char* str;
+    if (*c->json == '\"')
+      lept_parse_string_raw(c, &str, &len);
+    if (len == 0) {
+      ret = LEPT_PARSE_MISS_KEY;
+      break;
+    }
+    m.klen = len;
+    m.k = (char*)malloc(len + 1);
+    memcpy(m.k, str, len);
+    free(str);
+    m.k[len] = '\0';
+    lept_parse_whitespace(c);
+    if (*c->json == ':') {
+      c->json++;
+      lept_parse_whitespace(c);
+    }
+    else {
+      free(m.k);
+      ret = LEPT_PARSE_MISS_COLON;
+      break;
+    }
+    if ((ret = lept_parse_value(c, &m.v)) != LEPT_PARSE_OK)
+      break;
+    memcpy(lept_context_push(c, sizeof(lept_member)), &m, sizeof(lept_member));
+    size++;
+    m.k = NULL;
+    m.klen = 0;
+    lept_parse_whitespace(c);
+    if (*c->json == ',') {
+      c->json++;
+      lept_parse_whitespace(c);
+    }
+    else if (*c->json == '}') {
+      c->json++;
+      v->type = LEPT_OBJECT;
+      v->u.o.size = size;
+      size *= sizeof(lept_member);
+      memcpy(v->u.o.m = (lept_member*)malloc(size), lept_context_pop(c, size), size);
+      return LEPT_PARSE_OK;
+    }
+    else {
+      ret = LEPT_PARSE_MISS_COMMA_OR_CURLY_BRACKET;
+      break;
+    }
+  }
+  //free objects in stack
+  for (size_t i = 0; i < size; i++) {
+    lept_member* member = lept_context_pop(c, sizeof(lept_member));
+    free(member->k);
+    lept_free(&member->v);
+  }
+  return ret;
+}
+
 static int lept_parse_value(lept_context* c, lept_value* v) {
   switch (*c->json) {
   case 'n':
@@ -297,6 +368,8 @@ static int lept_parse_value(lept_context* c, lept_value* v) {
     return lept_parse_string(c, v);
   case '[':
     return lept_parse_array(c, v);
+  case '{':
+    return lept_parse_object(c, v);
   case '\0':
     return LEPT_PARSE_EXPECT_VALUE;
   default:
@@ -337,6 +410,13 @@ void lept_free(lept_value* v) {
     for (size_t i = 0; i < v->u.a.size; i++)
       lept_free(&v->u.a.e[i]);
     free(v->u.a.e);
+    break;
+  case LEPT_OBJECT:
+    for (size_t i = 0; i < v->u.o.size; i++) {
+      free(v->u.o.m[i].k);
+      lept_free(&v->u.o.m[i].v);
+    }
+    free(v->u.o.m);
     break;
   default:
     break;
