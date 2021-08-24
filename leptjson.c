@@ -152,40 +152,50 @@ static void lept_encode_utf8(lept_context* c, unsigned u) {
   }
 }
 
-static int lept_parse_string(lept_context* c, lept_value* v) {
-  size_t head = c->top, len;
+static int lept_parse_string_raw(lept_context* c, char** str, size_t* len) {
+  size_t head = c->top;
   EXPECT(c, '\"');
   const char* p;
   p = c->json;
   while (1) {
-    char ch = *p++, chh;
+    char ch = *p++;
     switch (ch) {
     case '\"':
-      len = c->top - head;
-      lept_set_string(v, (const char*)lept_context_pop(c, len), len);
+      *len = c->top - head;
+      // lept_set_string(v, (const char*)lept_context_pop(c, len), len);
+      *str = (char*)malloc(*len);
+      memcpy(*str, (const char*)lept_context_pop(c, *len), *len);
       c->json = p;
       return LEPT_PARSE_OK;
     case '\0':
       STRING_ERROR(LEPT_PARSE_MISS_QUOTATION_MARK);
     case '\\':
-      chh = *p++;
-      if (chh == '\\')
+      switch (*p++) {
+      case '\\':
         PUTC(c, '\\');
-      else if (chh == '\"')
+        break;
+      case '\"':
         PUTC(c, '\"');
-      else if (chh == '/')
+        break;
+      case '/':
         PUTC(c, '/');
-      else if (chh == 'b')
+        break;
+      case 'b':
         PUTC(c, '\b');
-      else if (chh == 'f')
+        break;
+      case 'f':
         PUTC(c, '\f');
-      else if (chh == 'n')
+        break;
+      case 'n':
         PUTC(c, '\n');
-      else if (chh == 'r')
+        break;
+      case 'r':
         PUTC(c, '\r');
-      else if (chh == 't')
+        break;
+      case 't':
         PUTC(c, '\t');
-      else if (chh == 'u') {
+        break;
+      case 'u': {
         unsigned u;
         if (!(p = lept_parse_hex4(p, &u)))
           STRING_ERROR(LEPT_PARSE_INVALID_UNICODE_HEX);
@@ -204,8 +214,9 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
             STRING_ERROR(LEPT_PARSE_INVALID_UNICODE_SURROGATE);
         }
         lept_encode_utf8(c, u);
+        break;
       }
-      else {
+      default:
         STRING_ERROR(LEPT_PARSE_INVALID_STRING_ESCAPE);
       }
       break;
@@ -217,6 +228,17 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
       PUTC(c, ch);
     }
   }
+}
+
+static int lept_parse_string(lept_context* c, lept_value* v) {
+  int ret;
+  char* s;
+  size_t len;
+  if ((ret = lept_parse_string_raw(c, &s, &len)) == LEPT_PARSE_OK) {
+    lept_set_string(v, s, len);
+    free(s);
+  }
+  return ret;
 }
 
 static int lept_parse_value(lept_context* c, lept_value* v);
