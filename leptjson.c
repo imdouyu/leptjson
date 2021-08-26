@@ -3,7 +3,7 @@
 #include <errno.h>  /* errno, ERANGE */
 #include <math.h>   /* HUGE_VAL */
 #include <stdlib.h> /* strtod() malloc() realloc() free() */
-#include <string.h>  /* memcpy() */
+#include <string.h>  /* memcpy() memcmp() */
 #include <stdio.h>  /* sprintf() */
 
 #ifndef LEPT_PARSE_STACK_INIT_SIZE
@@ -23,6 +23,8 @@
 #define ISDIGIT1TO9(ch) ((ch) >= '1' && (ch) <= '9')
 #define PUTC(c, ch) do { *(char*)lept_context_push(c, sizeof(char)) = (ch); } while(0)
 #define PUTS(c, s, len)     memcpy(lept_context_push(c, len), s, len)
+
+#define LEPT_KEY_NOT_EXIST ((size_t)-1)
 
 typedef struct {
   const char* json;
@@ -537,6 +539,48 @@ void lept_free(lept_value* v) {
   v->type = LEPT_NULL;
 }
 
+int lept_is_equal(const lept_value* lhs, const lept_value* rhs) {
+  assert(lhs != NULL && rhs != NULL);
+  if (lhs->type != rhs->type)
+    return 0;
+  switch (lhs->type) {
+  case LEPT_STRING:
+    return lhs->u.s.len == rhs->u.s.len && memcmp(lhs->u.s.s, rhs->u.s.s, lhs->u.s.len) == 0;
+  case LEPT_NUMBER:
+    return lhs->u.n == rhs->u.n;
+  case LEPT_ARRAY:
+    if (lhs->u.a.size != rhs->u.a.size)
+      return 0;
+    for (size_t i = 0; i < lhs->u.a.size; i++)
+      if (!lept_is_equal(&lhs->u.a.e[i], &rhs->u.a.e[i]))
+        return 0;
+    return 1;
+  case LEPT_OBJECT:
+    if (lhs->u.o.size != rhs->u.o.size)
+      return 0;
+    for (size_t i = 0; i < lhs->u.o.size; i++) {
+      lept_member* p = &lhs->u.o.m[i];
+      lept_member* v1 = &rhs->u.o.m[i];
+      int flag1 = 0, flag2 = 0;
+      for (size_t j = 0; j < rhs->u.o.size; j++) {
+        lept_member* q = &rhs->u.o.m[j];
+        lept_member* v2 = &lhs->u.o.m[j];
+        if (flag1 || (p->klen == q->klen && memcmp(p->k, q->k, q->klen) == 0 && lept_is_equal(&p->v, &q->v))) {
+          flag1 = 1;
+        }
+        if (flag2 || (v1->klen == v2->klen && memcmp(v1->k, v2->k, v1->klen) == 0 && lept_is_equal(&v1->v, &v2->v))) {
+          flag2 = 1;
+        }
+      }
+      if (flag1 == 0 || flag2 == 0)
+        return 0;
+    }
+    return 1;
+  default:
+    return 1;
+  }
+}
+
 lept_type lept_get_type(const lept_value* v) {
   assert(v != NULL);
   return v->type;
@@ -609,3 +653,18 @@ size_t lept_get_object_key_length(const lept_value* v, size_t index) {
 lept_value* lept_get_object_value(const lept_value* v, size_t index) {
   return &v->u.o.m[index].v;
 }
+
+size_t lept_find_object_index(const lept_value* v, const char* key, size_t klen) {
+  assert(v != NULL && v->type == LEPT_OBJECT && key != NULL);
+  for (size_t i = 0; i < v->u.o.size; i++)
+    if (v->u.o.m[i].klen == klen && memcmp(v->u.o.m[i].k, key, klen) == 0)
+      return i;
+  return LEPT_KEY_NOT_EXIST;
+}
+
+lept_value* lept_find_object_value(const lept_value* v, const char* key, size_t klen) {
+  size_t index = lept_find_object_index(v, key, klen);
+  return index != LEPT_KEY_NOT_EXIST ? &v->u.o.m[index].v : NULL;
+}
+
+
