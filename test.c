@@ -419,6 +419,7 @@ static void test_parse_invalid_unicode_hex() {
   TEST_ERROR(LEPT_PARSE_INVALID_UNICODE_HEX, "\"\\u00G0\"");
   TEST_ERROR(LEPT_PARSE_INVALID_UNICODE_HEX, "\"\\u000/\"");
   TEST_ERROR(LEPT_PARSE_INVALID_UNICODE_HEX, "\"\\u000G\"");
+  TEST_ERROR(LEPT_PARSE_INVALID_UNICODE_HEX, "\"\\u 123\"");
   // TEST_ERROR(LEPT_PARSE_INVALID_UNICODE_HEX, "\"\\udd1e\""); //low surrogate pair
 }
 
@@ -462,6 +463,41 @@ static void test_parse_miss_comma_or_curly_bracket() {
   TEST_ERROR(LEPT_PARSE_MISS_COMMA_OR_CURLY_BRACKET, "{\"a\":{}");
 }
 
+#define TEST_EQUAL(json1, json2, equality) \
+    do{\
+      lept_value v1, v2;\
+      lept_init(&v1);\
+      lept_init(&v2);\
+      EXPECT_EQ_INT(LEPT_PARSE_OK, lept_parse(&v1, json1));\
+      EXPECT_EQ_INT(LEPT_PARSE_OK, lept_parse(&v2, json2));\
+      EXPECT_EQ_INT(equality, lept_is_equal(&v1, &v2));\
+      lept_free(&v1);\
+      lept_free(&v2);\
+    }while (0)
+
+static void test_equal() {
+  TEST_EQUAL("null", "null", 1);
+  TEST_EQUAL("true", "true", 1);
+  TEST_EQUAL("false", "false", 1);
+  TEST_EQUAL("20210826", "20210826", 1);
+  TEST_EQUAL("\"hello world\"", "\"hello world\"", 1);
+  TEST_EQUAL("\"\\\" \\\\ \\/ \\b \\f \\n \\r \\t\"", "\"\\\" \\\\ \\/ \\b \\f \\n \\r \\t\"", 1);
+  TEST_EQUAL("[ ]", "[ ]", 1);
+  TEST_EQUAL("[1,2,3,4,5,[\"123\",2,3]]", "[1,2,3,4,5,[\"123\",2,3]]", 1);
+  TEST_EQUAL("{ }", "{ }", 1);
+  TEST_EQUAL("{\"key\": \"value\", \"a\":1, \"b\":2, \"c\":3}", "{\"key\": \"value\", \"a\":1, \"b\":2, \"c\":3}", 1);
+  TEST_EQUAL("{\"key\": \"value\", \"a\":1, \"b\":2, \"c\":3}", "{\"c\":3, \"b\":2, \"a\":1,\"key\": \"value\"}", 1);
+  TEST_EQUAL("{\"a\":{\"b\":{\"c\":{\"d\":{}}}}}", "{\"a\":{\"b\":{\"c\":{\"d\":{}}}}}", 1);
+  TEST_EQUAL("{\"a\":1, \"b\":1, \"c\":{\"d\":1,\"e\":{\"f\":1}}}", "{\"a\":1, \"c\":{\"d\":1,\"e\":{\"f\":1}}, \"b\":1}", 1);
+  TEST_EQUAL("null", "false", 0);
+  TEST_EQUAL("3.1415926", "3.1415927", 0);
+  TEST_EQUAL("[1,2,3]", "[1,2]", 0);
+  TEST_EQUAL("{\"a\":1, \"a\":1, \"a\":1}", "{\"a\":1, \"b\":1, \"c\":1}", 0);
+  TEST_EQUAL("{\"a\":1, \"b\":1, \"c\":1}", "{\"a\":1, \"a\":1, \"a\":1}", 0);
+  TEST_EQUAL("{\"a\":1, \"b\":1, \"c\":2}", "{\"a\":1, \"b\":1, \"c\":1}", 0);
+  TEST_EQUAL("{\"a\":1, \"b\":1, \"c\":{\"d\":1,\"e\":{\"f\":1}}}", "{\"a\":1, \"b\":1, \"c\":{\"d\":1,\"e\":{\"f\":0}}}", 0);
+}
+
 static void test_parse() {
   test_parse_null();
   test_parse_true();
@@ -491,6 +527,8 @@ static void test_parse() {
   test_parse_miss_comma_or_curly_bracket();
 
   test_stringify();
+
+  test_equal();
 }
 
 int main() {
