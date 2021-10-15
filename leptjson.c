@@ -49,6 +49,9 @@ static void* lept_context_push(lept_context* c, size_t size) {
 
 static void* lept_context_pop(lept_context* c, size_t size) {
   assert(c->top >= size);
+  // UB: applying zero offset to null pointer
+  if (c->stack == NULL)
+    return c->stack;
   return c->stack + (c->top -= size);
 }
 
@@ -611,7 +614,9 @@ void lept_set_string(lept_value* v, const char* s, size_t len) {
   assert(v != NULL && (s != NULL || len == 0));
   lept_free(v);
   v->u.s.s = (char*)malloc(len + 1);
-  memcpy(v->u.s.s, s, len);
+  // The behavior is undefined if either dest or src is an invalid or null pointer.
+  if (s != NULL)
+    memcpy(v->u.s.s, s, len);
   v->u.s.s[len] = '\0';
   v->u.s.len = len;
   v->type = LEPT_STRING;
